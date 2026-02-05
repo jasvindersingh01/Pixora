@@ -1,12 +1,78 @@
-import { useContext } from "react"
+import { use, useContext } from "react"
 import { assets, pricingPlans } from "../assets/index"
 import { AppContext } from "../context/AppContext"
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 export default function BuyCredit() {
 
-  const { user } = useContext(AppContext);
+  const { user, backendUrl, loadCreditsData, token, setShowLogin } = useContext(AppContext);
+  const navigate = useNavigate();
 
+  const initPay = async (order) => {
+    if (!window.Razorpay) {
+      toast.error("Razorpay SDK not loaded");
+      return;
+    }
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: order.currency,
+      name: "Pixora",
+      description: "Credits Payment",
+      order_id: order.id,
+      receipt: order.receipt,
+      handler: async (response) => {
+        try {
+          const { data } = await axios.post(backendUrl + "/api/user/verify-razorpay", response, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
+          if (data.success) {
+            loadCreditsData();
+            navigate("/");
+            toast.success("Credits added successfully!")
+          }
+
+        } catch (error) {
+          toast.error(
+            error.response?.data?.message || "Payment Failed, Somthing went wrong!"
+          );
+        }
+      }
+    }
+    const rzp = new window.Razorpay(options)
+    rzp.open();
+  }
+
+  const paymentRazorpay = async (planId) => {
+    console.log("Buy clicked", planId);
+    try {
+      if (!user) {
+        setShowLogin(true);
+        return;
+      }
+      const { data } = await axios.post(backendUrl + "/api/user/pay-razorpay", { planId }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+
+      });
+      console.log("Order response:", data);
+
+      if (data.success) {
+        initPay(data.order);
+      }
+
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Payment Failed, Somthing went wrong!"
+      );
+    }
+  }
 
   return (
     <motion.div
@@ -90,6 +156,7 @@ export default function BuyCredit() {
             </ul>
 
             <motion.button
+              onClick={() => paymentRazorpay(item.id)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={`mt-auto py-2.5 rounded-full font-medium transition

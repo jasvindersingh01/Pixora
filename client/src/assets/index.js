@@ -20,7 +20,7 @@ export const assets = {
 }
 export const pricingPlans = [
   {
-    id: 1,
+    id: "basic",
     name: "Basic",
     price: "$10",
     credits: 120,
@@ -37,7 +37,7 @@ export const pricingPlans = [
     popular: false,
   },
   {
-    id: 2,
+    id: "advance",
     name: "Advanced",
     price: "$50",
     credits: 500,
@@ -55,7 +55,7 @@ export const pricingPlans = [
     popular: true, 
   },
   {
-    id: 3,
+    id: "pro",
     name: "Pro",
     price: "$100",
     credits: 1300,

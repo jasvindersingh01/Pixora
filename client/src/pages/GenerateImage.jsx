@@ -1,16 +1,34 @@
-import { useState } from "react";
+import { useContext, useRef, useState, useEffect } from "react";
 import { assets } from "../assets";
 import { motion } from "framer-motion";
+import { AppContext } from "../context/AppContext";
 
 export default function GenerateImage() {
 
   const [image, setImage] = useState(assets.img1);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [input, setInput] = useState(" ")
+  const { generateImage } = useContext(AppContext);
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const onSubmitHandler = async (e) => {
+    e.preventDefault()
+    setLoading(true)
 
+    if (input) {
+      const image = await generateImage(input)
+      if (image) {
+        setIsImageLoaded(true)
+        setImage(image)
+      }
+    }
+    setLoading(false)
+    setInput(" ")
   }
 
   return (
@@ -67,6 +85,7 @@ export default function GenerateImage() {
           className="flex w-full max-w-xl items-center bg-white border border-gray-200 shadow-md mt-10 rounded-full px-2"
         >
           <input
+            ref={inputRef}
             onChange={(e) => setInput(e.target.value)}
             value={input}
             type="text"
@@ -93,7 +112,13 @@ export default function GenerateImage() {
           className="flex gap-4 flex-wrap justify-center mt-10"
         >
           <motion.button
-            onClick={() => setIsImageLoaded(false)}
+            onClick={() => {
+              setIsImageLoaded(false);
+              setInput("");
+              setTimeout(() => {
+                inputRef.current?.focus();
+              }, 0);
+            }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="border border-gray-300 px-8 py-3 rounded-full text-gray-800 hover:bg-gray-100 transition"
