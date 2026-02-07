@@ -8,6 +8,8 @@ import { toast } from "react-toastify";
 export default function Login() {
 
     const [state, setState] = useState("Login");
+    const [loading, setLoading] = useState(false);
+
     const { setShowLogin, backendUrl, setToken, setUser, loadCreditsData } = useContext(AppContext);
 
     const [name, setName] = useState("");
@@ -16,6 +18,7 @@ export default function Login() {
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
+        setLoading(true)
 
         try {
             if (state === "Login") {
@@ -48,7 +51,7 @@ export default function Login() {
                     localStorage.setItem("token", data.token);
 
                     await loadCreditsData(data.token);
-                    
+
                     setShowLogin(false);
                 } else {
                     toast.error(data.message);
@@ -154,9 +157,16 @@ export default function Login() {
                 <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-full text-white py-2 rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 hover:opacity-90 transition cursor-pointer"
+                    className={`w-full text-white py-2 rounded-full transition${loading ? "bg-gray-600 cursor-not-allowed" : "bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 hover:opacity-90 cursor-pointer"}`}
                 >
-                    {state === "Login" ? "Login" : "Create Account"}
+                    {loading ? (
+                        <span className="flex items-center justify-center gap-2">
+                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            {state === "Login" ? "Logging in..." : "Creating account..."}
+                        </span>
+                    ) : (
+                        <>{state === "Login" ? "Login" : "Create Account"}</>
+                    )}
                 </motion.button>
 
                 <motion.p
@@ -168,14 +178,22 @@ export default function Login() {
                     {state === "Login" ? (
                         <>
                             Don't have an account?{" "}
-                            <span className="text-purple-600 cursor-pointer" onClick={() => setState("Sign Up")}>
+                            <span
+                                className={`text-purple-600 ${loading ? "opacity-50 pointer-events-none" : "cursor-pointer"
+                                    }`}
+                                onClick={() => !loading && setState("Sign Up")}
+                            >
                                 Sign Up
                             </span>
                         </>
                     ) : (
                         <>
                             Already have an account?{" "}
-                            <span className="text-purple-600 cursor-pointer" onClick={() => setState("Login")}>
+                            <span
+                                className={`text-purple-600 ${loading ? "opacity-50 pointer-events-none" : "cursor-pointer"
+                                    }`}
+                                onClick={() => !loading && setState("Login")}
+                            >
                                 Login
                             </span>
                         </>
