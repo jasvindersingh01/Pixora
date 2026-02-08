@@ -157,7 +157,11 @@ export default function Login() {
                 <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`w-full text-white py-2 rounded-full transition${loading ? "bg-gray-600 cursor-not-allowed" : "bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 hover:opacity-90 cursor-pointer"}`}
+                    className={`w-full text-white py-2 rounded-full transition ${loading
+                            ? "bg-gray-600 cursor-not-allowed"
+                            : "bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 hover:opacity-90 cursor-pointer"
+                        }`}
+
                 >
                     {loading ? (
                         <span className="flex items-center justify-center gap-2">
